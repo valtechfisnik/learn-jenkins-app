@@ -1,6 +1,11 @@
 /* groovylint-disable NestedBlockDepth */
 pipeline {
     agent any
+
+    environment {
+        NETLIFY_SITE_ID = '8f887142-11db-4939-8d0b-5f66815acdeb'
+    }
+
     stages {
         stage('Build') {
             agent {
@@ -30,6 +35,7 @@ pipeline {
                             reuseNode true
                         }
                     }
+
                     steps {
                         sh '''
                 test -f build/index.html
@@ -63,6 +69,23 @@ pipeline {
                         }
                     }
                 }
+            }
+        }
+
+        stage('Deploy') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+
+            steps {
+                sh '''
+                    npm install netlify-cli
+                    node_modules/.bin/netlify --version
+                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                '''
             }
         }
     }
