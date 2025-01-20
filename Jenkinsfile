@@ -1,4 +1,3 @@
-/* groovylint-disable NestedBlockDepth */
 pipeline {
     agent any
 
@@ -27,9 +26,9 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Tests') {
             parallel {
-                stage('Unit Tests') {
+                stage('Unit tests') {
                     agent {
                         docker {
                             image 'node:18-alpine'
@@ -39,9 +38,9 @@ pipeline {
 
                     steps {
                         sh '''
-                #test -f build/index.html
-                npm test
-                '''
+                            #test -f build/index.html
+                            npm test
+                        '''
                     }
                     post {
                         always {
@@ -49,6 +48,7 @@ pipeline {
                         }
                     }
                 }
+
                 stage('E2E') {
                     agent {
                         docker {
@@ -56,17 +56,19 @@ pipeline {
                             reuseNode true
                         }
                     }
+
                     steps {
                         sh '''
-                   npm install serve
-                   node_modules/.bin/serve -s build &
-                   sleep 10
-                   npx playwright test --reporter=html
-                                    '''
+                            npm install serve
+                            node_modules/.bin/serve -s build &
+                            sleep 10
+                            npx playwright test  --reporter=html
+                        '''
                     }
+
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Local HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Local', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
@@ -80,7 +82,6 @@ pipeline {
                     reuseNode true
                 }
             }
-
             steps {
                 sh '''
                     npm install netlify-cli
@@ -92,27 +93,29 @@ pipeline {
             }
         }
 
-        stage('Production E2E') {
-                    agent {
-                        docker {
-                            image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
-                            reuseNode true
-                        }
-                    }
+        stage('Prod E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
+                    reuseNode true
+                }
+            }
 
-                    environment {
-                        CI_ENVIRONMENT_URL = 'https://super-dango-aa4861.netlify.app'
-                    }
-                    steps {
-                        sh '''
-                       npx playwright test --reporter=html
-                                    '''
-                    }
-                    post {
-                        always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-                        }
-                    }
+            environment {
+                CI_ENVIRONMENT_URL = 'https://super-dango-aa4861.netlify.app'
+            }
+
+            steps {
+                sh '''
+                    npx playwright test  --reporter=html
+                '''
+            }
+
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E', reportTitles: '', useWrapperFileDirectly: true])
+                }
+            }
         }
     }
 }
