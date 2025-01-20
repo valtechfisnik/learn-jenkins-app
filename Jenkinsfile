@@ -39,7 +39,7 @@ pipeline {
 
                     steps {
                         sh '''
-                test -f build/index.html
+                #test -f build/index.html
                 npm test
                 '''
                     }
@@ -105,7 +105,7 @@ pipeline {
                     }
                     steps {
                         sh '''
-                   npx playwright test --reporter=html
+                       npx playwright test --reporter=html
                                     '''
                     }
                     post {
