@@ -92,7 +92,7 @@ pipeline {
                     node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json
                 '''
                 script {
-                    end.STAGING_URL = sh(script:"node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true)
+                    env.STAGING_URL = sh(script:"node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true)
                 }
             }
         }
@@ -104,7 +104,6 @@ pipeline {
                     reuseNode true
                 }
             }
-
             environment {
                 CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
             }
@@ -117,7 +116,7 @@ pipeline {
 
             post {
                 always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Production E2E', reportTitles: '', useWrapperFileDirectly: true])
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Staging E2E', reportTitles: '', useWrapperFileDirectly: true])
                 }
             }
         }
@@ -157,7 +156,7 @@ pipeline {
             }
 
             environment {
-                CI_ENVIRONMENT_URL = 'https://super-dango-aa4861.netlify.app/'
+                CI_ENVIRONMENT_URL = 'https://super-dango-aa4861.netlify.app'
             }
 
             steps {
