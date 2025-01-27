@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        NETLIFY_SITE_ID = '8f887142-11db-4939-8d0b-5f66815acdeb'
+        NETLIFY_SITE_ID = 'YOUR NETLIFY SITE ID'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
         REACT_APP_VERSION = "1.0.$BUILD_ID"
     }
@@ -12,7 +12,7 @@ pipeline {
             agent {
                 docker {
                     image 'amazon/aws-cli'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
+                    args "--entrypoint=''"
                 }
             }
             steps {
@@ -85,14 +85,14 @@ pipeline {
 
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Local', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Local E2E', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
             }
         }
 
-        stage('Deploy Staging') {
+        stage('Deploy staging') {
             agent {
                 docker {
                     image 'my-playwright'
@@ -110,7 +110,7 @@ pipeline {
                     echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
                     netlify status
                     netlify deploy --dir=build --json > deploy-output.json
-                    CI_ENVIRONMENT_URL=$(node-jq -r '.deploy_url' deploy-output.json)
+                    CI_ENVIRONMENT_URL=$(jq -r '.deploy_url' deploy-output.json)
                     npx playwright test  --reporter=html
                 '''
             }
@@ -122,7 +122,7 @@ pipeline {
             }
         }
 
-        stage('Deploy Production') {
+        stage('Deploy prod') {
             agent {
                 docker {
                     image 'my-playwright'
@@ -147,7 +147,7 @@ pipeline {
 
             post {
                 always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Production E2E', reportTitles: '', useWrapperFileDirectly: true])
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Prod E2E', reportTitles: '', useWrapperFileDirectly: true])
                 }
             }
         }
