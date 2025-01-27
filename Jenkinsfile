@@ -12,7 +12,6 @@ pipeline {
             agent {
                 docker {
                     image 'amazon/aws-cli'
-                    args '--network=jenkins-network'
                 }
             }
             steps {
