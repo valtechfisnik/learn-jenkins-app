@@ -11,7 +11,8 @@ pipeline {
         stage('AWS') {
             agent {
                 docker {
-                    image 'amazon/aws-cli:2.23.6'
+                    image 'amazon/aws-cli'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
             steps {
