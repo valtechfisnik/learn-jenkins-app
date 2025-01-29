@@ -6,6 +6,9 @@ pipeline {
         // NETLIFY_AUTH_TOKEN = credentials('netlify-token')
         REACT_APP_VERSION = "1.0.$BUILD_ID"
         AWS_DEFAULT_REGION = 'eu-central-1'
+        AWS_ECS_CLUSTER = 'LearnJenkinsApp-Cluster-Dev'
+        AWS_ECS_CLUSTER_SERVICE = 'LearnJenkinsApp-Service-Dev'
+        AWS_ECS_TASK_DEFINITION = 'LearnJenkinsApp-TaskDefinition-Dev'
     }
 
     stages {
@@ -25,9 +28,10 @@ pipeline {
                     sh '''
                         aws --version
                         yum install jq -y
-                        LATEST_TD_REVISION=$(aws ecs register-task-definition --cli-input-json file://aws/task-definition-dev.json | jq '.taskDefinition.revision') 
+                        LATEST_TD_REVISION=$(aws ecs register-task-definition --cli-input-json file://aws/task-definition-dev.json | jq '.taskDefinition.revision')
                         echo $LATEST_TD_REVISION
-                        aws ecs update-service --cluster LearnJenkinsApp-Cluster-Dev --service LearnJenkinsApp-Service-Dev --task-definition LearnJenkinsApp-TaskDefinition-Dev:$LATEST_TD_REVISION
+                        aws ecs update-service --cluster $AWS_ECS_CLUSTER --service $AWS_ECS_CLUSTER_SERVICE --task-definition $AWS_ECS_TASK_DEFINITION:$LATEST_TD_REVISION
+                        aws ecs wait services-stable --cluster $AWS_ECS_CLUSTER --services $AWS_ECS_CLUSTER_SERVICE
                     '''
                 }
             }
